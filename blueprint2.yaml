@@ -20,16 +20,19 @@ blueprint:
       description: The time when the night mode starts.
       selector:
         time: {}
+
     time2:
       name: (Required) Off Time Night
       description: The time when the night mode ends.
       selector:
         time: {}
+
     time3:
       name: (Required) Off Time Night
       description: The time when the night mode ends.
       selector:
         time: {}
+
     time1_brightness:
       name: Time1 brightness
       description: Brightness, in time mode 1
@@ -40,6 +43,7 @@ blueprint:
           max: 100.0
           step: 1.0
           mode: slider
+
     time2_brightness:
       name: Time2 brightness
       description: Brightness, in time mode 2
@@ -50,6 +54,7 @@ blueprint:
           max: 100.0
           step: 1.0
           mode: slider
+
     time3_brightness:
       name: time3 brightness
       description: Brightness, in time mode 3
@@ -60,6 +65,7 @@ blueprint:
           max: 100.0
           step: 1.0
           mode: slider
+
     no_motion_wait_time1:
       name: Wait time mode 1
       description: Time to leave the light on after detecting the last movement in mode 1.
@@ -69,6 +75,7 @@ blueprint:
           min: 0
           max: 3600
           unit_of_measurement: seconds
+
     no_motion_wait_time2:
       name: Wait time mode 2
       description: Time to leave the light on after detecting the last movement in mode 2.
@@ -78,6 +85,7 @@ blueprint:
           min: 0
           max: 3600
           unit_of_measurement: seconds
+
     no_motion_wait_time3:
       name: Wait time mode 3
       description: Time to leave the light on after detecting the last movement in mode 3.
@@ -103,13 +111,13 @@ action:
   - choose:
       - conditions:
           - condition: time
-            after: !input on_night_time
-            before: !input off_night_time
+            after: !input on_time1
+            before: !input off_time1
         sequence:
           - alias: "Turn on the light"
             service: light.turn_on
             data:
-              brightness_pct: !input night_brightness
+              brightness_pct: !input time1_brightness
             target: !input light_target
           - alias: "Wait until there is no motion from device"
             wait_for_trigger:
@@ -118,15 +126,16 @@ action:
               from: "on"
               to: "off"
           - alias: "Wait the number of seconds that has been set"
-            delay: !input no_motion_wait_night
+            delay: !input no_motion_wait_time1
           - alias: "Turn off the light"
             service: light.turn_off
             target: !input light_target
+
     default:
       - alias: "Turn on the light"
         service: light.turn_on
         data:
-          brightness_pct: !input day_brightness
+          brightness_pct: !input time2_brightness
         target: !input light_target
       - alias: "Wait until there is no motion from device"
         wait_for_trigger:
@@ -135,7 +144,25 @@ action:
           from: "on"
           to: "off"
       - alias: "Wait the number of seconds that has been set"
-        delay: !input no_motion_wait_day
+        delay: !input no_motion_wait_time2
+      - alias: "Turn off the light"
+        service: light.turn_off
+        target: !input light_target
+
+    v1:
+      - alias: "Turn on the light"
+        service: light.turn_on
+        data:
+          brightness_pct: !input time3_brightness
+        target: !input light_target
+      - alias: "Wait until there is no motion from device"
+        wait_for_trigger:
+          platform: state
+          entity_id: !input motion_entity
+          from: "on"
+          to: "off"
+      - alias: "Wait the number of seconds that has been set"
+        delay: !input no_motion_wait_time3
       - alias: "Turn off the light"
         service: light.turn_off
         target: !input light_target
